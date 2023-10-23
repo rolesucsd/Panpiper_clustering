@@ -3,7 +3,7 @@ numpy
 seaborn
 sklearn
 scipy
-skbio
+scikit-bio
 random
 sklearn
 os
