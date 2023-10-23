@@ -4,8 +4,6 @@ seaborn
 scikit-learn
 scipy
 scikit-bio
-os
 matplotlib.pyplot
 streamlit
-io
 base64
