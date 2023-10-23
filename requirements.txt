@@ -4,7 +4,6 @@ seaborn
 sklearn
 scipy
 scikit-bio
-random
 sklearn
 os
 matplotlib.pyplot
