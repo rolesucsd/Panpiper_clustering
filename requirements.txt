@@ -4,7 +4,6 @@ seaborn
 scikit-learn
 scipy
 scikit-bio
-sklearn
 os
 matplotlib.pyplot
 streamlit
