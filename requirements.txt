@@ -1,0 +1,13 @@
+pandas
+numpy
+seaborn
+sklearn
+scipy
+skbio
+random
+sklearn
+os
+matplotlib.pyplot
+streamlit
+io
+base64
