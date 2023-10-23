@@ -12,7 +12,6 @@ from sklearn.cluster import DBSCAN
 from sklearn.manifold import MDS
 from sklearn.manifold import TSNE
 import os  # Add this line to import the os module
-import umap
 import matplotlib.pyplot as plt
 import streamlit as st
 from io import BytesIO
