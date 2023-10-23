@@ -1,7 +1,7 @@
 pandas
 numpy
 seaborn
-sklearn
+scikit-learn
 scipy
 scikit-bio
 sklearn
