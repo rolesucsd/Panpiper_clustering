@@ -135,17 +135,23 @@ def main():
     phylogroup = None  # Define phylogroup
 
     if mash_file is not None and group_file is not None:
+        # User uploaded files, load them
+        mash, group = load_data(mash_file, group_file)
+    else:
+        # User didn't upload files, use default data from GitHub
+        default_mash_url = 'https://github.com/rolesucsd/Panpiper_clustering/blob/main/fasta.tsv'
+        default_group_url = 'https://github.com/rolesucsd/Panpiper_clustering/blob/main/group.txt'
+        mash, group = load_data(default_mash_url, default_group_url)        
         st.write('Data loaded successfully.')
 
-        mash, group = load_data(mash_file, group_file)
-        cluster_labels, phylogroup = perform_clustering(mash, clustering_height)
-        pca_df, tsne_df, name1, name2 = pca_and_tsne(mash, cluster_labels)
-        plot_pca_and_tsne(pca_df, tsne_df, phylogroup, name1, name2)
+    cluster_labels, phylogroup = perform_clustering(mash, clustering_height)
+    pca_df, tsne_df, name1, name2 = pca_and_tsne(mash, cluster_labels)
+    plot_pca_and_tsne(pca_df, tsne_df, phylogroup, name1, name2)
 
-        result = perform_permanova(mash, group, selection)
-        st.header('PerMANOVA Result')
-        st.write(result)
-        plot_manual_clustering(group, selection, pca_df, tsne_df, name1, name2)
+    result = perform_permanova(mash, group, selection)
+    st.header('PerMANOVA Result')
+    st.write(result)
+    plot_manual_clustering(group, selection, pca_df, tsne_df, name1, name2)
 
     if st.button("Download Phylogroup Data"):
         if phylogroup is not None:
