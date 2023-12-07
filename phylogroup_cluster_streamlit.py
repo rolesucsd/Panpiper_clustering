@@ -16,18 +16,36 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from io import BytesIO
 import base64
+import requests
+import io
 
-@st.cache  # Use Streamlit caching for data loading
+st.set_page_config(page_title="Phylogrouping", page_icon=":dna:")
+
+def load_data_from_github(mash_url, group_url):
+    mash_response = requests.get(mash_url)
+    group_response = requests.get(group_url)
+
+    mash = pd.read_csv(io.StringIO(mash_response.text), sep="\t", index_col=0)
+    group = pd.read_csv(io.StringIO(group_response.text), encoding='latin-1')
+    return mash, group
+    
 def load_data(mash_file, group_file):
-    mash = pd.read_csv(mash_file, sep="\t", index_col=0)
-    mash.index = [os.path.splitext(os.path.basename(row))[0] for row in mash.index]
-    mash.columns = [os.path.splitext(os.path.basename(col))[0] for col in mash.columns]
-    group = pd.read_csv(group_file, sep="\t", encoding='latin-1')
+    mash = pd.read_csv(mash_file, sep="\t", index_col=0, header=0)
+#    mash.index = [os.path.splitext(os.path.basename(row))[0] for row in mash.index]
+#    mash.columns = [os.path.splitext(os.path.basename(col))[0] for col in mash.columns]
+    metadata = pd.read_csv(metadata_file, index_col=0, sep=None, engine='python')
     return mash, group
 
+def extract_sample_id(index):
+    # Split the index string by '/' and get the second-to-last part
+    parts = index.split('/')
+    if len(parts) >= 2:
+        return parts[-2]
+    else:
+        return index  # In case the index format is unexpected, return it as is
+
 def perform_clustering(mash, clustering_height):
-    dist = mash
-    square_dist = squareform(dist)
+    square_dist = squareform(mash)
     linkage_matrix = linkage(square_dist, method='ward')
 
     max_d = clustering_height * np.max(linkage_matrix[:, 2])
@@ -41,10 +59,9 @@ def perform_clustering(mash, clustering_height):
     return cluster_labels, phylogroup
 
 def perform_permanova(mash, group, selection):
-    group_filtered = group[group[selection].isin([0, 1])]
-    common_ids = set(mash.index).intersection(group_filtered['Sample'])
+    common_ids = set(mash.index).intersection(group['Sample'])
     mash_filtered = mash.loc[common_ids, common_ids]
-    group_filtered = group_filtered[group_filtered['Sample'].isin(common_ids)]
+    group_filtered = group[group['Sample'].isin(common_ids)]
 
     sample_order = mash_filtered.index.tolist()
     grouping = group_filtered.set_index('Sample').loc[sample_order, selection].tolist()
@@ -93,7 +110,6 @@ def pca_and_tsne(mash, cluster_labels):
 
     return pca_df, tsne_df, name1, name2
 
-
 def plot_pca_and_tsne(pca_df, tsne_df, phylogroup, name1, name2):
     unique_phylogroups = phylogroup['Phylogroup'].unique()
     random.shuffle(unique_phylogroups)
@@ -119,9 +135,8 @@ def download_link(object_to_download, download_filename, download_link_text):
     return f'<a href="data:file/txt;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
 
-def main():
+def phylogroup():
     # Set page title and font
-    st.set_page_config(page_title='Phylogroup Selection and Grouping', page_icon=':dna:')
     st.title('Phylogroup Selection and Grouping')
     st.markdown('<style>h1{font-family: "MonoLisa", monospace; font-size: 32px !important;}</style>', unsafe_allow_html=True)
 
@@ -130,7 +145,7 @@ def main():
     mash_file = st.sidebar.file_uploader('Upload MASH File (TSV)', type=['tsv'])
     group_file = st.sidebar.file_uploader('Upload Group Data (Text File)', type=['txt'])
     clustering_height = st.sidebar.slider('Clustering Height', 0.1, 1.0, 0.44, 0.01)
-    selection = st.sidebar.text_input('Manual Clustering Selection (e.g., "Isolation Source")')
+    selection = st.sidebar.text_input('Manual Clustering Selection (e.g., "Isolation Source")','HOST')
 
     phylogroup = None  # Define phylogroup
 
@@ -139,10 +154,14 @@ def main():
         mash, group = load_data(mash_file, group_file)
     else:
         # User didn't upload files, use default data from GitHub
-        default_mash_url = 'https://github.com/rolesucsd/Panpiper_clustering/blob/main/fasta.tsv'
-        default_group_url = 'https://github.com/rolesucsd/Panpiper_clustering/blob/main/group.txt'
-        mash, group = load_data(default_mash_url, default_group_url)        
+        mash_url = 'https://github.com/rolesucsd/Panpiper_clustering/raw/main/example_files/fasta.tsv'
+        group_url = 'https://github.com/rolesucsd/Panpiper_clustering/raw/main/example_files/group.txt'
+        mash, group = load_data_from_github(mash_url, group_url)
         st.write('Data loaded successfully.')
+
+    group = group.rename(columns={group.columns[0]: "Sample"})
+    mash.index = mash.index.map(extract_sample_id)
+    mash.columns = mash.columns.map(extract_sample_id)
 
     cluster_labels, phylogroup = perform_clustering(mash, clustering_height)
     pca_df, tsne_df, name1, name2 = pca_and_tsne(mash, cluster_labels)
@@ -158,6 +177,3 @@ def main():
             # Provide a download link for the phylogroup data
             tmp_download_link = download_link(phylogroup, 'phylogroup.txt', 'Click here to download phylogroup.txt')
             st.markdown(tmp_download_link, unsafe_allow_html=True)
-
-if __name__ == '__main__':
-    main()
