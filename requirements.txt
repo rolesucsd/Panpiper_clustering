@@ -6,3 +6,5 @@ scipy
 scikit-bio
 matplotlib
 streamlit
+statsmodels
+ete3
