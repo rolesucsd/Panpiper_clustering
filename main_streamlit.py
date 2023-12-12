@@ -6,7 +6,7 @@ from diff_abund_streamlit import abundance
 
 def main():
     st.sidebar.title("Navigation")
-    app_selector = st.sidebar.radio("Go to", ["Pangenome Composition", "Phylogrouping", "Phylogeny", "Differential Prevalence"])
+    app_selector = st.sidebar.radio("Go to", ["Pangenome Composition", "Phylogrouping", "Differential Prevalence"])
 
     if app_selector == "Pangenome Composition":
         pangenome_composition()
@@ -14,8 +14,8 @@ def main():
     elif app_selector == "Phylogrouping":
         phylogroup()
 
-    elif app_selector == "Phylogeny":
-        phylogeny()
+#    elif app_selector == "Phylogeny":
+ #       phylogeny()
 
     elif app_selector == "Differential Prevalence":
         abundance()
