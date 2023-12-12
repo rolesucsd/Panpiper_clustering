@@ -1,7 +1,6 @@
 import streamlit as st
 from subsample_genes_matrix_streamlit import pangenome_composition
 from phylogroup_cluster_streamlit import phylogroup
-from phylogeny_streamlit import phylogeny
 from diff_abund_streamlit import abundance
 
 def main():
@@ -13,9 +12,6 @@ def main():
 
     elif app_selector == "Phylogrouping":
         phylogroup()
-
-#    elif app_selector == "Phylogeny":
- #       phylogeny()
 
     elif app_selector == "Differential Prevalence":
         abundance()
