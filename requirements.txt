@@ -5,7 +5,7 @@ scikit-learn
 scipy
 scikit-bio
 matplotlib
-streamlit
+streamlit==1.27.2
 statsmodels
-PyQt5
+PyQt5==5.11.3
 ete3==3.1.2
