@@ -18,22 +18,12 @@ from io import BytesIO
 import base64
 import requests
 import io
-
-st.set_page_config(page_title="Phylogrouping", page_icon=":dna:")
-
-def load_data_from_github(mash_url, group_url):
-    mash_response = requests.get(mash_url)
-    group_response = requests.get(group_url)
-
-    mash = pd.read_csv(io.StringIO(mash_response.text), sep="\t", index_col=0)
-    group = pd.read_csv(io.StringIO(group_response.text), encoding='latin-1')
-    return mash, group
     
 def load_data(mash_file, group_file):
     mash = pd.read_csv(mash_file, sep="\t", index_col=0, header=0)
 #    mash.index = [os.path.splitext(os.path.basename(row))[0] for row in mash.index]
 #    mash.columns = [os.path.splitext(os.path.basename(col))[0] for col in mash.columns]
-    metadata = pd.read_csv(metadata_file, index_col=0, sep=None, engine='python')
+    group = pd.read_csv(group_file, sep=None, engine='python')
     return mash, group
 
 def extract_sample_id(index):
@@ -61,14 +51,19 @@ def perform_clustering(mash, clustering_height):
 def perform_permanova(mash, group, selection):
     common_ids = set(mash.index).intersection(group['Sample'])
     mash_filtered = mash.loc[common_ids, common_ids]
+    # put a check here to make sure the row and column names are the same 
     group_filtered = group[group['Sample'].isin(common_ids)]
+    # insert a check here to make sure the mash matrix isn't empty after this 
 
     sample_order = mash_filtered.index.tolist()
+    group_filtered = group_filtered.drop_duplicates(subset="Sample", keep="first")
     grouping = group_filtered.set_index('Sample').loc[sample_order, selection].tolist()
 
     mash_df = mash_filtered.apply(pd.to_numeric, errors='coerce')
     mash_df = np.ascontiguousarray(mash_df.values)
     mash_dm = DistanceMatrix(mash_df, ids=common_ids)
+
+    # put a check here to make sure the grouping and mash_dm are the same length
 
     result = permanova(distance_matrix=mash_dm, grouping=grouping, permutations=10000)
     return result
@@ -145,20 +140,17 @@ def phylogroup():
     mash_file = st.sidebar.file_uploader('Upload MASH File (TSV)', type=['tsv'])
     group_file = st.sidebar.file_uploader('Upload Group Data (Text File)', type=['txt'])
     clustering_height = st.sidebar.slider('Clustering Height', 0.1, 1.0, 0.44, 0.01)
-    selection = st.sidebar.text_input('Manual Clustering Selection (e.g., "Isolation Source")','HOST')
 
     phylogroup = None  # Define phylogroup
 
-    if mash_file is not None and group_file is not None:
+    if mash_file and group_file:
         # User uploaded files, load them
         mash, group = load_data(mash_file, group_file)
+        group_columns = list(group.columns)
     else:
-        # User didn't upload files, use default data from GitHub
-        mash_url = 'https://github.com/rolesucsd/Panpiper_clustering/raw/main/example_files/fasta.tsv'
-        group_url = 'https://github.com/rolesucsd/Panpiper_clustering/raw/main/example_files/group.txt'
-        mash, group = load_data_from_github(mash_url, group_url)
-        st.write('Data loaded successfully.')
+        st.warning('Please upload a mash distance matrix.')
 
+    selection = st.sidebar.selectbox("Clustering Selection", group_columns)
     group = group.rename(columns={group.columns[0]: "Sample"})
     mash.index = mash.index.map(extract_sample_id)
     mash.columns = mash.columns.map(extract_sample_id)
