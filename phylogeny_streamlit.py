@@ -1,5 +1,5 @@
 import streamlit as st
-from ete3 import Tree, TreeStyle, NodeStyle
+import ete3 as et
 import pandas as pd
 import seaborn as sns
 from io import BytesIO
@@ -9,7 +9,7 @@ import threading
 
 def load_data(metadata_file, tree_file):
     metadata = pd.read_csv(metadata_file, index_col=0, sep=None, engine='python')
-    tree = Tree(tree_file.read().decode("utf-8"))
+    tree = et.Tree(tree_file.read().decode("utf-8"))
     return metadata, tree
 
 def render_tree_image(metadata, tree, metadata_category):
@@ -19,7 +19,7 @@ def render_tree_image(metadata, tree, metadata_category):
         # Reroot the tree at the midpoint node
         tree.set_outgroup(midpoint_node)
 
-        ts = TreeStyle()
+        ts = et.TreeStyle()
         ts.mode = "c"
         ts.show_leaf_name = False
 
@@ -34,7 +34,7 @@ def render_tree_image(metadata, tree, metadata_category):
         metadata_colors = {value: f"#{int(color[0]*255):02X}{int(color[1]*255):02X}{int(color[2]*255):02X}" for value, color in zip(unique_values, color_palette)}
 
         for n in tree.traverse():
-            nstyle = NodeStyle()
+            nstyle = et.NodeStyle()
             # Hide node circles
             if n.is_leaf():
                 n_metadata = metadata.at[n.name, metadata_category]
