@@ -7,5 +7,5 @@ scikit-bio
 matplotlib
 streamlit
 statsmodels
+PyQt5
 ete3==3.1.2
-PyQt5==5.11.3
