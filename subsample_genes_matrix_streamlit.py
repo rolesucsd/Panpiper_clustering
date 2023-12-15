@@ -5,9 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
 
-#def set_page_configuration():
-#    st.set_page_config(page_title="Pangenome Composition", page_icon=":dna:", layout="wide")
-#    sys.setrecursionlimit(100000)  # You can adjust the limit as needed
+st.set_page_config(page_title="Pangenome Composition", page_icon=":dna:", layout="wide")
+sys.setrecursionlimit(100000)  # You can adjust the limit as needed
 
 def load_data(matrix_file):
     try:
@@ -53,8 +52,6 @@ def plot_pangenome_analysis(pangenome_data, data_anno, threshold):
 
 def pangenome_composition():
     try:
-        set_page_configuration()
-
         # Sidebar for data loading and settings
         st.sidebar.title('Data Loading and Settings')
         matrix_file = st.sidebar.file_uploader('Upload Matrix File (Text File)', type=['txt'])
