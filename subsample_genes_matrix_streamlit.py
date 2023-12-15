@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
 
-def set_page_configuration():
-    st.set_page_config(page_title="Pangenome Composition", page_icon=":dna:", layout="wide")
-    sys.setrecursionlimit(100000)  # You can adjust the limit as needed
+#def set_page_configuration():
+#    st.set_page_config(page_title="Pangenome Composition", page_icon=":dna:", layout="wide")
+#    sys.setrecursionlimit(100000)  # You can adjust the limit as needed
 
 def load_data(matrix_file):
     try:
