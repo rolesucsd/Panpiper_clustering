@@ -26,26 +26,46 @@ def sample_data(data, threshold):
             return data[sampled_columns]
     return None
 
+import pandas as pd
+
 # Function to create pangenome data
 def create_pangenome_data(threshold, genes_matrix_df):
     pangenome_data = pd.DataFrame(columns=["genome", "pangenome", "core", "addition", "unique"])
+    data_list = []
 
     size = genes_matrix_df.shape[1]
     d1 = genes_matrix_df.iloc[:, 0]
 
-    pangenome_data.loc[0] = [1, len(d1[d1 != 0]), len(d1[d1 == 1]), len(d1[d1 != 0]), len(d1[d1 != 0])]
+    initial_data = {
+        "genome": 1, 
+        "pangenome": len(d1[d1 != 0]), 
+        "core": len(d1[d1 == 1]), 
+        "addition": len(d1[d1 != 0]), 
+        "unique": len(d1[d1 != 0])
+    }
+    data_list.append(initial_data)
 
     for i in range(2, threshold + 1):
         genome = i
         d1 = d1 + genes_matrix_df.iloc[:, i - 1].apply(pd.to_numeric)
         pangenome = len(d1[d1 != 0])
         coregenome = len(d1[d1 >= i * 0.99])
-        addition = pangenome - pangenome_data.iloc[-1]["pangenome"]
+        addition = pangenome - data_list[-1]["pangenome"]
         unique = len(d1[d1 == 1])
 
-        pangenome_data = pangenome_data.append({"genome": genome, "pangenome": pangenome, "core": coregenome, "addition": addition, "unique": unique}, ignore_index=True)
+        data = {
+            "genome": genome, 
+            "pangenome": pangenome, 
+            "core": coregenome, 
+            "addition": addition, 
+            "unique": unique
+        }
+        data_list.append(data)
+
+    pangenome_data = pd.DataFrame(data_list)
 
     return pangenome_data
+
 
 # Main function
 def pangenome_composition():
