@@ -44,7 +44,7 @@ def perform_clustering(mash, clustering_height):
 
 def perform_permanova(mash, group, selection):
     try:
-        common_ids = set(mash.index).intersection(group['Sample'])
+        common_ids = list(set(mash.index).intersection(group['Sample']))
         mash_filtered = mash.loc[common_ids, common_ids]
         group_filtered = group[group['Sample'].isin(common_ids)].drop_duplicates(subset="Sample", keep="first")
 
