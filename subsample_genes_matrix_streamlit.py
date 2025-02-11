@@ -70,7 +70,6 @@ def create_pangenome_data(threshold, genes_matrix_df):
 # Main function
 def pangenome_composition():
     # Sidebar for data loading and settings
-    st.set_option('deprecation.showfileUploaderEncoding', False)
     st.sidebar.title('Data Loading and Settings')
     matrix_file = st.sidebar.file_uploader('Upload Matrix File (Text File)', type=['txt'])
     sample_button = st.sidebar.button('Sample Data')
